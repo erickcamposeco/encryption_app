@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Encryption History</h2>
+<a href="{{ url_for('routes.dashboard') }}" class="btn btn-primary mb-3">Back to Dashboard</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Original Text</th>
+            <th>Token</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ record.original_text }}</td>
+            <td class="text-truncate" style="max-width: 200px;">{{ record.token }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

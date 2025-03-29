@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Bienvenido, {{ current_user.username }}!</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link {% if active_tab == 'encrypt' %}active{% endif %}" 
+                       id="encrypt-tab" data-toggle="tab" href="#encrypt" role="tab">
+                       Encriptar
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_tab == 'decrypt' %}active{% endif %}" 
+                       id="decrypt-tab" data-toggle="tab" href="#decrypt" role="tab">
+                       Desencriptar
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body tab-content" id="myTabContent">
+            <!-- Pestaña de Encriptar -->
+            <div class="tab-pane fade {% if active_tab == 'encrypt' %}show active{% endif %}" 
+                 id="encrypt" role="tabpanel">
+                <form method="POST" action="{{ url_for('routes.dashboard') }}">
+                    <input type="hidden" name="action" value="encrypt">
+                    <div class="form-group">
+                        <label for="encrypt-text">Texto a encriptar</label>
+                        <textarea class="form-control" id="encrypt-text" name="text" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Encriptar</button>
+                </form>
+
+                {% if encrypted_text %}
+                <div class="mt-4">
+                    <h5>Texto Encriptado:</h5>
+                    <div class="alert alert-secondary break-word">{{ encrypted_text }}</div>
+                    
+                    <h5>Token de Acceso:</h5>
+                    <div class="alert alert-info break-word">{{ token }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Pestaña de Desencriptar -->
+            <div class="tab-pane fade {% if active_tab == 'decrypt' %}show active{% endif %}" 
+                 id="decrypt" role="tabpanel">
+                <form method="POST" action="{{ url_for('routes.dashboard') }}">
+                    <input type="hidden" name="action" value="decrypt">
+                    <div class="form-group">
+                        <label for="decrypt-token">Token a desencriptar</label>
+                        <textarea class="form-control" id="decrypt-token" name="token" rows="3" required>{{ token if token }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Desencriptar</button>
+                </form>
+
+                {% if decrypted_text %}
+                <div class="mt-4">
+                    <h5>Texto Original:</h5>
+                    <div class="alert alert-success">{{ decrypted_text }}</div>
+                    
+                    <h5>Fecha de Desencriptación:</h5>
+                    <div class="alert alert-light">{{ decryption_time }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ url_for('routes.history') }}" class="btn btn-info">Ver Historial</a>
+        <a href="{{ url_for('routes.logout') }}" class="btn btn-danger">Cerrar Sesión</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<!-- Bootstrap CSS local -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<style>
+    .break-word {
+        word-break: break-all;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<!-- jQuery local -->
+<script src="{{ url_for('static', filename='js/jquery-3.7.1.min.js') }}"></script>
+<!-- Bootstrap JS local -->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+$(document).ready(function() {
+    // Mantener el estado de las pestañas después de enviar formulario
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+    
+    var activeTab = localStorage.getItem('activeTab');
+    if (activeTab) {
+        $('[href="' + activeTab + '"]').tab('show');
+    }
+
+    // Manejar errores de formulario
+    $('form').on('submit', function() {
+        localStorage.setItem('activeTab', $(this).closest('.tab-pane').attr('id'));
+    });
+});
+</script>
+{% endblock %}
